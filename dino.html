@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome Dino Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #535353;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: #535353;
+        }
+
+        .score {
+            font-weight: bold;
+        }
+
+        .high-score {
+            color: #888;
+        }
+
+        canvas {
+            width: 100%;
+            height: 250px;
+            border: 3px solid #535353;
+            border-radius: 10px;
+            display: block;
+            background: #f7f7f7;
+        }
+
+        .game-over {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .game-over.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .game-over h2 {
+            font-size: 2rem;
+            color: #535353;
+            margin-bottom: 15px;
+        }
+
+        .game-over p {
+            color: #888;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            background: #535353;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .controls {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7f7f7;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .controls h3 {
+            color: #535353;
+            margin-bottom: 15px;
+        }
+
+        .controls p {
+            color: #888;
+            margin: 5px 0;
+        }
+
+        .key {
+            display: inline-block;
+            padding: 5px 10px;
+            background: white;
+            border: 2px solid #535353;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #535353;
+            margin: 0 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .game-container {
+                padding: 20px;
+            }
+
+            canvas {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🦖 Chrome Dino Game</h1>
+        <p>Press SPACE or click to jump!</p>
+    </div>
+
+    <div class="game-container">
+        <div class="game-info">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="high-score">High Score: <span id="highScore">0</span></div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="game-over" id="gameOver">
+            <h2>Game Over!</h2>
+            <p>Your Score: <span id="finalScore">0</span></p>
+            <button class="btn" onclick="restartGame()">Play Again</button>
+        </div>
+
+        <div class="controls">
+            <h3>Controls</h3>
+            <p><span class="key">SPACE</span> or <span class="key">↑</span> to Jump</p>
+            <p><span class="key">↓</span> to Duck (coming soon)</p>
+            <p>Click anywhere on the game to jump!</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = 800;
+        canvas.height = 250;
+
+        // Game variables
+        let gameSpeed = 6;
+        let gravity = 0.6;
+        let score = 0;
+        let highScore = localStorage.getItem('dinoHighScore') || 0;
+        let gameRunning = false;
+        let gameOver = false;
+
+        // Dino object
+        const dino = {
+            x: 50,
+            y: 150,
+            width: 40,
+            height: 50,
+            dy: 0,
+            jumpPower: 12,
+            grounded: false,
+            jump: function() {
+                if (this.grounded) {
+                    this.dy = -this.jumpPower;
+                    this.grounded = false;
+                }
+            }
+        };
+
+        // Obstacles array
+        let obstacles = [];
+        let frameCount = 0;
+        let obstacleFrequency = 120;
+
+        // Update high score display
+        document.getElementById('highScore').textContent = highScore;
+
+        // Draw dino
+        function drawDino() {
+            ctx.fillStyle = '#535353';
+            ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+            
+            // Eyes
+            ctx.fillStyle = 'white';
+            ctx.fillRect(dino.x + 25, dino.y + 10, 8, 8);
+            
+            // Legs (simple animation)
+            if (Math.floor(frameCount / 10) % 2 === 0) {
+                ctx.fillRect(dino.x + 5, dino.y + dino.height, 10, 10);
+                ctx.fillRect(dino.x + 25, dino.y + dino.height, 10, 10);
+            } else {
+                ctx.fillRect(dino.x + 10, dino.y + dino.height, 10, 10);
+                ctx.fillRect(dino.x + 20, dino.y + dino.height, 10, 10);
+            }
+        }
+
+        // Draw obstacle
+        function drawObstacle(obs) {
+            ctx.fillStyle = '#535353';
+            
+            if (obs.type === 'cactus') {
+                // Cactus body
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                // Arms
+                ctx.fillRect(obs.x - 5, obs.y + 10, 5, 15);
+                ctx.fillRect(obs.x + obs.width, obs.y + 15, 5, 15);
+            } else {
+                // Bird
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                // Wings
+                ctx.fillRect(obs.x - 5, obs.y + 5, obs.width + 10, 5);
+            }
+        }
+
+        // Draw ground
+        function drawGround() {
+            ctx.strokeStyle = '#535353';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, 200);
+            ctx.lineTo(canvas.width, 200);
+            ctx.stroke();
+            
+            // Ground pattern
+            for (let i = 0; i < canvas.width; i += 20) {
+                ctx.fillStyle = '#535353';
+                ctx.fillRect(i + (frameCount % 20), 205, 2, 2);
+            }
+        }
+
+        // Draw clouds
+        function drawClouds() {
+            ctx.fillStyle = '#d3d3d3';
+            const cloudX = (canvas.width - (frameCount * 2) % (canvas.width + 200));
+            ctx.fillRect(cloudX, 50, 50, 20);
+            ctx.fillRect(cloudX + 10, 40, 30, 20);
+            ctx.fillRect(cloudX + 100, 70, 60, 25);
+            ctx.fillRect(cloudX + 110, 60, 40, 25);
+        }
+
+        // Update dino physics
+        function updateDino() {
+            dino.dy += gravity;
+            dino.y += dino.dy;
+
+            // Ground collision
+            if (dino.y > 150) {
+                dino.y = 150;
+                dino.dy = 0;
+                dino.grounded = true;
+            }
+        }
+
+        // Spawn obstacles
+        function spawnObstacle() {
+            const type = Math.random() > 0.7 ? 'bird' : 'cactus';
+            const obstacle = {
+                x: canvas.width,
+                y: type === 'bird' ? 120 : 150,
+                width: type === 'bird' ? 40 : 20,
+                height: type === 'bird' ? 30 : 50,
+                type: type
+            };
+            obstacles.push(obstacle);
+        }
+
+        // Update obstacles
+        function updateObstacles() {
+            if (frameCount % obstacleFrequency === 0) {
+                spawnObstacle();
+            }
+
+            obstacles.forEach((obs, index) => {
+                obs.x -= gameSpeed;
+
+                // Remove off-screen obstacles
+                if (obs.x + obs.width < 0) {
+                    obstacles.splice(index, 1);
+                    score += 10;
+                }
+
+                // Collision detection
+                if (
+                    dino.x < obs.x + obs.width &&
+                    dino.x + dino.width > obs.x &&
+                    dino.y < obs.y + obs.height &&
+                    dino.y + dino.height > obs.y
+                ) {
+                    endGame();
+                }
+            });
+        }
+
+        // Update score
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+            
+            // Increase difficulty
+            if (score % 100 === 0 && score > 0) {
+                gameSpeed += 0.5;
+                obstacleFrequency = Math.max(60, obstacleFrequency - 5);
+            }
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (!gameRunning || gameOver) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawClouds();
+            drawGround();
+            drawDino();
+            
+            obstacles.forEach(obs => drawObstacle(obs));
+
+            updateDino();
+            updateObstacles();
+            updateScore();
+
+            frameCount++;
+            requestAnimationFrame(gameLoop);
+        }
+
+        // End game
+        function endGame() {
+            gameOver = true;
+            gameRunning = false;
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOver').classList.add('show');
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('dinoHighScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+            }
+        }
+
+        // Start game
+        function startGame() {
+            gameRunning = true;
+            gameOver = false;
+            score = 0;
+            gameSpeed = 6;
+            obstacleFrequency = 120;
+            obstacles = [];
+            frameCount = 0;
+            dino.y = 150;
+            dino.dy = 0;
+            dino.grounded = true;
+            
+            document.getElementById('gameOver').classList.remove('show');
+            document.getElementById('score').textContent = '0';
+            
+            gameLoop();
+        }
+
+        // Restart game
+        function restartGame() {
+            startGame();
+        }
+
+        // Controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                e.preventDefault();
+                if (!gameRunning && !gameOver) {
+                    startGame();
+                } else if (gameRunning) {
+                    dino.jump();
+                }
+            }
+        });
+
+        canvas.addEventListener('click', () => {
+            if (!gameRunning && !gameOver) {
+                startGame();
+            } else if (gameRunning) {
+                dino.jump();
+            }
+        });
+
+        // Draw initial screen
+        ctx.fillStyle = '#535353';
+        ctx.font = '30px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText('Press SPACE or Click to Start', canvas.width / 2, canvas.height / 2);
+        
+        drawGround();
+        drawDino();
+    </script>
+</body>
+</html>

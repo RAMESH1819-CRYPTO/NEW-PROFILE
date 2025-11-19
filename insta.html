@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Clone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #fafafa;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 975px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+        }
+
+        .logo {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 20px;
+            font-size: 24px;
+        }
+
+        .nav-icons span {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .nav-icons span:hover {
+            opacity: 0.6;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 935px;
+            margin: 80px auto 0;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Stories */
+        .stories {
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .story {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .story-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-avatar-inner {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            border: 3px solid white;
+        }
+
+        .story-username {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* Post */
+        .post {
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+        }
+
+        .post-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .post-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .post-username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .post-image {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        .post-actions {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .post-actions-left {
+            display: flex;
+            gap: 16px;
+            font-size: 24px;
+        }
+
+        .post-actions span {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .post-actions span:hover {
+            opacity: 0.6;
+        }
+
+        .post-likes {
+            padding: 0 16px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .post-caption {
+            padding: 0 16px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .post-caption .username {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .post-comments {
+            padding: 0 16px;
+            font-size: 14px;
+            color: #8e8e8e;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .post-time {
+            padding: 0 16px 16px;
+            font-size: 10px;
+            color: #8e8e8e;
+            text-transform: uppercase;
+        }
+
+        .add-comment {
+            border-top: 1px solid #efefef;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .add-comment input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .add-comment button {
+            background: none;
+            border: none;
+            color: #0095f6;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 90px;
+            height: fit-content;
+        }
+
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .profile-info .username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .profile-info .name {
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        .suggestions {
+            margin-top: 20px;
+        }
+
+        .suggestions-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .suggestions-header .title {
+            font-weight: 600;
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        .suggestion {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .suggestion-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .suggestion-info {
+            flex: 1;
+        }
+
+        .suggestion-info .username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .suggestion-info .status {
+            color: #8e8e8e;
+            font-size: 12px;
+        }
+
+        .follow-btn {
+            color: #0095f6;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #c7c7c7;
+            font-size: 11px;
+        }
+
+        /* Create Post Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #dbdbdb;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 16px;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .upload-area {
+            border: 2px dashed #dbdbdb;
+            border-radius: 8px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            background: #fafafa;
+        }
+
+        .modal-body textarea {
+            width: 100%;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid #dbdbdb;
+        }
+
+        .modal-footer button {
+            width: 100%;
+            padding: 12px;
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .modal-footer button:hover {
+            background: #1877f2;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                margin-top: 60px;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .stories {
+                border: none;
+                border-radius: 0;
+            }
+
+            .post {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">Instagram</div>
+            <div class="nav-icons">
+                <span onclick="openCreateModal()">➕</span>
+                <span>❤️</span>
+                <span>👤</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Feed -->
+        <div class="feed">
+            <!-- Stories -->
+            <div class="stories">
+                <div class="story">
+                    <div class="story-avatar">
+                        <div class="story-avatar-inner">👤</div>
+                    </div>
+                    <div class="story-username">Your story</div>
+                </div>
+                <div class="story">
+                    <div class="story-avatar">
+                        <div class="story-avatar-inner">🎨</div>
+                    </div>
+                    <div class="story-username">artist_dev</div>
+                </div>
+                <div class="story">
+                    <div class="story-avatar">
+                        <div class="story-avatar-inner">🎮</div>
+                    </div>
+                    <div class="story-username">gamer_pro</div>
+                </div>
+                <div class="story">
+                    <div class="story-avatar">
+                        <div class="story-avatar-inner">📸</div>
+                    </div>
+                    <div class="story-username">photo_love</div>
+                </div>
+                <div class="story">
+                    <div class="story-avatar">
+                        <div class="story-avatar-inner">🎵</div>
+                    </div>
+                    <div class="story-username">music_beats</div>
+                </div>
+            </div>
+
+            <!-- Posts -->
+            <div id="postsContainer">
+                <!-- Sample Post 1 -->
+                <div class="post">
+                    <div class="post-header">
+                        <div class="post-user">
+                            <div class="post-avatar">🎨</div>
+                            <span class="post-username">creative_designer</span>
+                        </div>
+                        <span style="cursor: pointer;">⋯</span>
+                    </div>
+                    <div class="post-image">🎨</div>
+                    <div class="post-actions">
+                        <div class="post-actions-left">
+                            <span onclick="likePost(this)">🤍</span>
+                            <span>💬</span>
+                            <span>📤</span>
+                        </div>
+                        <span>🔖</span>
+                    </div>
+                    <div class="post-likes">1,234 likes</div>
+                    <div class="post-caption">
+                        <span class="username">creative_designer</span>
+                        New design project completed! 🎨✨
+                    </div>
+                    <div class="post-comments">View all 89 comments</div>
+                    <div class="post-time">2 hours ago</div>
+                    <div class="add-comment">
+                        <input type="text" placeholder="Add a comment...">
+                        <button>Post</button>
+                    </div>
+                </div>
+
+                <!-- Sample Post 2 -->
+                <div class="post">
+                    <div class="post-header">
+                        <div class="post-user">
+                            <div class="post-avatar">📸</div>
+                            <span class="post-username">photography_daily</span>
+                        </div>
+                        <span style="cursor: pointer;">⋯</span>
+                    </div>
+                    <div class="post-image">📸</div>
+                    <div class="post-actions">
+                        <div class="post-actions-left">
+                            <span onclick="likePost(this)">🤍</span>
+                            <span>💬</span>
+                            <span>📤</span>
+                        </div>
+                        <span>🔖</span>
+                    </div>
+                    <div class="post-likes">2,567 likes</div>
+                    <div class="post-caption">
+                        <span class="username">photography_daily</span>
+                        Golden hour magic 🌅
+                    </div>
+                    <div class="post-comments">View all 142 comments</div>
+                    <div class="post-time">5 hours ago</div>
+                    <div class="add-comment">
+                        <input type="text" placeholder="Add a comment...">
+                        <button>Post</button>
+                    </div>
+                </div>
+
+                <!-- Sample Post 3 -->
+                <div class="post">
+                    <div class="post-header">
+                        <div class="post-user">
+                            <div class="post-avatar">🎮</div>
+                            <span class="post-username">gaming_world</span>
+                        </div>
+                        <span style="cursor: pointer;">⋯</span>
+                    </div>
+                    <div class="post-image">🎮</div>
+                    <div class="post-actions">
+                        <div class="post-actions-left">
+                            <span onclick="likePost(this)">🤍</span>
+                            <span>💬</span>
+                            <span>📤</span>
+                        </div>
+                        <span>🔖</span>
+                    </div>
+                    <div class="post-likes">3,891 likes</div>
+                    <div class="post-caption">
+                        <span class="username">gaming_world</span>
+                        Epic gaming setup complete! 🎮💻
+                    </div>
+                    <div class="post-comments">View all 256 comments</div>
+                    <div class="post-time">1 day ago</div>
+                    <div class="add-comment">
+                        <input type="text" placeholder="Add a comment...">
+                        <button>Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="profile-card">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-info">
+                    <div class="username">ramesh_siddu</div>
+                    <div class="name">Ramesh (SIDDU)</div>
+                </div>
+            </div>
+
+            <div class="suggestions">
+                <div class="suggestions-header">
+                    <span class="title">Suggestions For You</span>
+                    <span class="follow-btn">See All</span>
+                </div>
+                <div class="suggestion">
+                    <div class="suggestion-avatar">🚀</div>
+                    <div class="suggestion-info">
+                        <div class="username">tech_innovator</div>
+                        <div class="status">Followed by user123</div>
+                    </div>
+                    <span class="follow-btn" onclick="followUser(this)">Follow</span>
+                </div>
+                <div class="suggestion">
+                    <div class="suggestion-avatar">💻</div>
+                    <div class="suggestion-info">
+                        <div class="username">code_master</div>
+                        <div class="status">New to Instagram</div>
+                    </div>
+                    <span class="follow-btn" onclick="followUser(this)">Follow</span>
+                </div>
+                <div class="suggestion">
+                    <div class="suggestion-avatar">🎯</div>
+                    <div class="suggestion-info">
+                        <div class="username">design_guru</div>
+                        <div class="status">Followed by friend</div>
+                    </div>
+                    <span class="follow-btn" onclick="followUser(this)">Follow</span>
+                </div>
+                <div class="suggestion">
+                    <div class="suggestion-avatar">🌟</div>
+                    <div class="suggestion-info">
+                        <div class="username">creator_hub</div>
+                        <div class="status">Popular</div>
+                    </div>
+                    <span class="follow-btn" onclick="followUser(this)">Follow</span>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>About · Help · Press · API · Jobs · Privacy · Terms</p>
+                <p>Locations · Language · Meta Verified</p>
+                <p style="margin-top: 16px;">© 2025 INSTAGRAM FROM META</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Create new post
+                <span class="modal-close" onclick="closeCreateModal()">✕</span>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📷</div>
+                    <div style="font-size: 18px; margin-bottom: 8px;">Select photos and videos</div>
+                    <div style="color: #8e8e8e; font-size: 14px;">or drag and drop</div>
+                    <input type="file" id="fileInput" style="display: none;" accept="image/*" onchange="handleFileSelect(event)">
+                </div>
+                <textarea placeholder="Write a caption..." id="captionInput"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button onclick="createPost()">Share</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function likePost(element) {
+            if (element.textContent === '🤍') {
+                element.textContent = '❤️';
+                const likesDiv = element.closest('.post').querySelector('.post-likes');
+                const currentLikes = parseInt(likesDiv.textContent.replace(/,/g, ''));
+                likesDiv.textContent = (currentLikes + 1).toLocaleString() + ' likes';
+            } else {
+                element.textContent = '🤍';
+                const likesDiv = element.closest('.post').querySelector('.post-likes');
+                const currentLikes = parseInt(likesDiv.textContent.replace(/,/g, ''));
+                likesDiv.textContent = (currentLikes - 1).toLocaleString() + ' likes';
+            }
+        }
+
+        function followUser(element) {
+            if (element.textContent === 'Follow') {
+                element.textContent = 'Following';
+                element.style.color = '#8e8e8e';
+            } else {
+                element.textContent = 'Follow';
+                element.style.color = '#0095f6';
+            }
+        }
+
+        function openCreateModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.remove('active');
+            document.getElementById('captionInput').value = '';
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                console.log('File selected:', file.name);
+            }
+        }
+
+        function createPost() {
+            const caption = document.getElementById('captionInput').value;
+            
+            const emojis = ['🎨', '📸', '🎮', '🎵', '⚡', '🌟', '🚀', '💻', '🎯', '✨'];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            const newPost = document.createElement('div');
+            newPost.className = 'post';
+            newPost.innerHTML = `
+                <div class="post-header">
+                    <div class="post-user">
+                        <div class="post-avatar">👤</div>
+                        <span class="post-username">ramesh_siddu</span>
+                    </div>
+                    <span style="cursor: pointer;">⋯</span>
+                </div>
+                <div class="post-image">${randomEmoji}</div>
+                <div class="post-actions">
+                    <div class="post-actions-left">
+                        <span onclick="likePost(this)">🤍</span>
+                        <span>💬</span>
+                        <span>📤</span>
+                    </div>
+                    <span>🔖</span>
+                </div>
+                <div class="post-likes">0 likes</div>
+                <div class="post-caption">
+                    <span class="username">ramesh_siddu</span>
+                    ${caption || 'New post!'}
+                </div>
+                <div class="post-comments">Be the first to comment</div>
+                <div class="post-time">Just now</div>
+                <div class="add-comment">
+                    <input type="text" placeholder="Add a comment...">
+                    <button>Post</button>
+                </div>
+            `;
+            
+            document.getElementById('postsContainer').insertBefore(newPost, document.getElementById('postsContainer').firstChild);
+            closeCreateModal();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('createModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCreateModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Share App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            background: #eef1ff;
+            border-color: #764ba2;
+            transform: translateY(-5px);
+        }
+
+        .upload-area.dragover {
+            background: #e3e7ff;
+            border-color: #764ba2;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .upload-area h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .upload-area p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 30px;
+        }
+
+        .file-item {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            background: #eef1ff;
+            transform: translateX(5px);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+        }
+
+        .file-details h4 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .file-details p {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff3838;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .share-link-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 12px;
+        }
+
+        .share-link-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .share-link-input input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .received-files {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 File Share App</h1>
+            <p>Share files instantly and securely</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="icon">📤</div>
+                <div class="value" id="uploadedCount">0</div>
+                <div class="label">Files Uploaded</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📥</div>
+                <div class="value" id="receivedCount">0</div>
+                <div class="label">Files Received</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">💾</div>
+                <div class="value" id="totalSize">0 MB</div>
+                <div class="label">Total Size</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>📤 Upload Files</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">☁️</div>
+                    <h3>Drag & Drop Files Here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" id="fileInput" multiple>
+                </div>
+
+                <div class="file-list" id="uploadedFiles">
+                    <!-- Uploaded files will appear here -->
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🔗 Share Link</h2>
+                <p style="color: #666; margin-bottom: 20px;">Generate a shareable link for your files</p>
+                
+                <div class="share-link-section">
+                    <h4 style="margin-bottom: 10px;">Your Share Link:</h4>
+                    <div class="share-link-input">
+                        <input type="text" id="shareLink" value="https://fileshare.app/s/abc123xyz" readonly>
+                        <button class="btn btn-primary" onclick="copyShareLink()">📋 Copy</button>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.85rem; color: #666;">
+                        🔒 Link expires in 24 hours
+                    </p>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h4 style="margin-bottom: 15px;">Share via:</h4>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="shareVia('email')">📧 Email</button>
+                        <button class="btn btn-secondary" onclick="shareVia('whatsapp')">💬 WhatsApp</button>
+                        <button class="btn btn-secondary" onclick="shareVia('telegram')">✈️ Telegram</button>
+                        <button class="btn btn-secondary" onclick="shareVia('qr')">📱 QR Code</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="received-files">
+            <h2 style="margin-bottom: 30px;">📥 Received Files</h2>
+            <div id="receivedFilesList">
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <h3>No files received yet</h3>
+                    <p>Files shared with you will appear here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFilesData = [];
+        let receivedFilesData = [
+            { name: 'Project_Presentation.pdf', size: 2.5, from: 'john_doe', time: '2 hours ago' },
+            { name: 'Design_Assets.zip', size: 15.8, from: 'jane_smith', time: '5 hours ago' }
+        ];
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                const fileData = {
+                    name: file.name,
+                    size: (file.size / (1024 * 1024)).toFixed(2),
+                    type: file.type,
+                    id: Date.now() + Math.random()
+                };
+                uploadedFilesData.push(fileData);
+                addFileToList(fileData);
+                simulateUpload(fileData.id);
+            });
+            updateStats();
+        }
+
+        function addFileToList(fileData) {
+            const fileList = document.getElementById('uploadedFiles');
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.id = `file-${fileData.id}`;
+            
+            const fileIcon = getFileIcon(fileData.name);
+            
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <div class="file-icon">${fileIcon}</div>
+                    <div class="file-details">
+                        <h4>${fileData.name}</h4>
+                        <p>${fileData.size} MB</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-${fileData.id}"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button class="btn btn-secondary" onclick="shareFile(${fileData.id})">🔗 Share</button>
+                    <button class="btn btn-danger" onclick="deleteFile(${fileData.id})">🗑️</button>
+                </div>
+            `;
+            
+            fileList.appendChild(fileItem);
+        }
+
+        function simulateUpload(fileId) {
+            let progress = 0;
+            const progressBar = document.getElementById(`progress-${fileId}`);
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '📄',
+                'doc': '📝', 'docx': '📝',
+                'xls': '📊', 'xlsx': '📊',
+                'ppt': '📊', 'pptx': '📊',
+                'zip': '📦', 'rar': '📦',
+                'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️',
+                'mp4': '🎥', 'avi': '🎥', 'mov': '🎥',
+                'mp3': '🎵', 'wav': '🎵',
+                'txt': '📃',
+                'html': '🌐', 'css': '🎨', 'js': '⚡'
+            };
+            return icons[ext] || '📄';
+        }
+
+        function deleteFile(fileId) {
+            const fileItem = document.getElementById(`file-${fileId}`);
+            fileItem.style.opacity = '0';
+            fileItem.style.transform = 'translateX(-20px)';
+            setTimeout(() => {
+                fileItem.remove();
+                uploadedFilesData = uploadedFilesData.filter(f => f.id !== fileId);
+                updateStats();
+            }, 300);
+        }
+
+        function shareFile(fileId) {
+            alert('Share link copied to clipboard!\n\nhttps://fileshare.app/f/' + fileId);
+        }
+
+        function copyShareLink() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            btn.style.background = '#10b981';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+            }, 2000);
+        }
+
+        function shareVia(platform) {
+            const link = document.getElementById('shareLink').value;
+            const messages = {
+                'email': `Opening email client...`,
+                'whatsapp': `Opening WhatsApp...`,
+                'telegram': `Opening Telegram...`,
+                'qr': `Generating QR Code...`
+            };
+            alert(messages[platform] + '\n\nShare link: ' + link);
+        }
+
+        function updateStats() {
+            document.getElementById('uploadedCount').textContent = uploadedFilesData.length;
+            document.getElementById('receivedCount').textContent = receivedFilesData.length;
+            
+            const totalSize = uploadedFilesData.reduce((sum, file) => sum + parseFloat(file.size), 0);
+            document.getElementById('totalSize').textContent = totalSize.toFixed(2) + ' MB';
+        }
+
+        function loadReceivedFiles() {
+            const container = document.getElementById('receivedFilesList');
+            if (receivedFilesData.length === 0) return;
+            
+            container.innerHTML = '';
+            receivedFilesData.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-icon">${getFileIcon(file.name)}</div>
+                        <div class="file-details">
+                            <h4>${file.name}</h4>
+                            <p>${file.size} MB • From ${file.from} • ${file.time}</p>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-primary" onclick="downloadFile('${file.name}')">⬇️ Download</button>
+                    </div>
+                `;
+                container.appendChild(fileItem);
+            });
+        }
+
+        function downloadFile(filename) {
+            alert('Downloading: ' + filename);
+        }
+
+        // Initialize
+        updateStats();
+        loadReceivedFiles();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+//
+    <!-- Projects Page -->
+    <div id="projects" class="page">
+        <div class="container">
+            <div class="section-header">
+                <h2>My Projects</h2>
+                <p>Some of my recent work</p>
+            </div>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-thumbnail">📱</div>
+                    <div class="project-info">
+                        <h3>Instagram Clone</h3>
+                        <p>A full-featured Instagram clone with user authentication, photo uploads, likes, and comments functionality.</p>
+                        <div class="project-links">
+                            <a href="#">View Code</a>
+                            <a href="insta.html">Live Demo</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-thumbnail">📁</div>
+                    <div class="project-info">
+                        <h3>File Share App</h3>
+                        <p>Secure file sharing application with real-time upload tracking and download management features.</p>
+                        <div class="project-links">
+                            <a href="#">View Code</a>
+                            <a href="share.html">Live Demo</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-thumbnail">🔐</div>
+                    <div class="project-info">
+                        <h3>Login/Signup System</h3>
+                        <p>Robust authentication system with password encryption, session management, and user verification.</p>
+                        <div class="project-links">
+                            <a href="#">View Code</a>
+                            <a href="login.html">Live Demo</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-thumbnail">🎮</div>
+                    <div class="project-info">
+                        <h3>Unity Mini Games</h3>
+                        <p>Collection of small games built in Unity 3D featuring physics-based gameplay and engaging mechanics.</p>
+                        <div class="project-links">
+                            <a href="#">View Code</a>
+                            <a href="dino.html">Play Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-thumbnail">🎤</div>
+                    <div class="project-info">
+                        <h3>Python Voice Assistant</h3>
+                        <p>AI-powered voice assistant that performs tasks using speech recognition and natural language processing.</p>
+                        <div class="project-links">
+                            <a href="#">View Code</a>
+                            <a href="pvoice.html">Demo Video</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-thumbnail">🚀</div>
+                    <div class="project-info">
+                        <h3>Future Projects</h3>
+                        <p>Exciting new projects coming soon! Stay tuned for innovative applications and creative solutions.</p>
+                        <div class="project-links">
+                            <a href="fproject.html">Coming Soon</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
