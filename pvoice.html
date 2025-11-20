@@ -3,500 +3,401 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Assistant - Python Demo</title>
+    <title>AI Chatbot System (With Remember Me)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-        }
-
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .main-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            margin-bottom: 30px;
-        }
-
-        .assistant-avatar {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 30px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-            position: relative;
-        }
-
-        .assistant-avatar.listening {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-            }
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.6);
-            }
-        }
-
-        .status {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .status h2 {
-            font-size: 1.8rem;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .status p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .chat-container {
-            background: #f8f9ff;
-            border-radius: 15px;
-            padding: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 10px;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.user {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin-left: 20%;
-        }
-
-        .message.assistant {
-            background: white;
-            color: #333;
-            margin-right: 20%;
-            border: 2px solid #e0e0e0;
-        }
-
-        .message-header {
-            font-weight: 600;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-
-        .feature-card .icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-        }
-
-        .feature-card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .feature-card p {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .code-section {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .code-section h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .code-block {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 20px;
-            border-radius: 10px;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        .code-block .comment {
-            color: #6a9955;
-        }
-
-        .code-block .keyword {
-            color: #569cd6;
-        }
-
-        .code-block .string {
-            color: #ce9178;
-        }
-
-        .code-block .function {
-            color: #dcdcaa;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .main-card {
-                padding: 25px;
-            }
-
-            .message.user {
-                margin-left: 0;
-            }
-
-            .message.assistant {
-                margin-right: 0;
-            }
-        }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎤 Python Voice Assistant</h1>
-            <p>Your AI-powered personal assistant</p>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="message-circle" class="text-indigo-600 w-8 h-8"></i>
+                    <h1 class="text-3xl font-bold text-gray-800">AI Chatbot System</h1>
+                </div>
+                <button id="logoutBtn" class="hidden flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    Logout
+                </button>
+            </div>
         </div>
 
-        <div class="main-card">
-            <div class="assistant-avatar" id="avatar">🤖</div>
-            
-            <div class="status">
-                <h2 id="statusText">Ready to Help!</h2>
-                <p id="statusSubtext">Click "Start Listening" or try a command below</p>
-            </div>
-
-            <div class="controls">
-                <button class="btn btn-primary" id="listenBtn" onclick="startListening()">
-                    🎤 Start Listening
-                </button>
-                <button class="btn btn-secondary" id="stopBtn" onclick="stopListening()" disabled>
-                    ⏹️ Stop
-                </button>
-            </div>
-
-            <div class="chat-container" id="chatContainer">
-                <div class="message assistant">
-                    <div class="message-header">🤖 Assistant</div>
-                    <div>Hello! I'm your voice assistant. I can help you with various tasks like checking weather, setting reminders, searching the web, playing music, and much more. How can I assist you today?</div>
+        <div id="view-home" class="view-section active">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition">
+                    <i data-lucide="user" class="text-indigo-600 w-12 h-12 mb-4"></i>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">User Portal</h2>
+                    <p class="text-gray-600 mb-6">Sign up or login to chat</p>
+                    <div class="space-y-3">
+                        <button onclick="switchView('view-signup')" class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold">Sign Up</button>
+                        <button onclick="switchView('view-user-login')" class="w-full py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition font-semibold">Login</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition">
+                    <i data-lucide="lock" class="text-purple-600 w-12 h-12 mb-4"></i>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Admin Portal</h2>
+                    <p class="text-gray-600 mb-6">Manage AI commands</p>
+                    <button onclick="switchView('view-admin-login')" class="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold">Admin Login</button>
                 </div>
             </div>
         </div>
 
-        <div class="features">
-            <div class="feature-card" onclick="sendCommand('What\'s the weather today?')">
-                <div class="icon">🌤️</div>
-                <h3>Weather</h3>
-                <p>Check weather forecast</p>
-            </div>
-            <div class="feature-card" onclick="sendCommand('Set a reminder for 3 PM')">
-                <div class="icon">⏰</div>
-                <h3>Reminders</h3>
-                <p>Set reminders & alarms</p>
-            </div>
-            <div class="feature-card" onclick="sendCommand('Search for Python tutorials')">
-                <div class="icon">🔍</div>
-                <h3>Search</h3>
-                <p>Search the web</p>
-            </div>
-            <div class="feature-card" onclick="sendCommand('Play some music')">
-                <div class="icon">🎵</div>
-                <h3>Music</h3>
-                <p>Play your favorites</p>
-            </div>
-            <div class="feature-card" onclick="sendCommand('What time is it?')">
-                <div class="icon">🕐</div>
-                <h3>Time & Date</h3>
-                <p>Get current time</p>
-            </div>
-            <div class="feature-card" onclick="sendCommand('Tell me a joke')">
-                <div class="icon">😄</div>
-                <h3>Entertainment</h3>
-                <p>Jokes & fun facts</p>
+        <div id="view-signup" class="view-section">
+            <div class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Create Account</h2>
+                <form id="signupForm" class="space-y-4">
+                    <input type="text" name="username" placeholder="Username" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    <input type="email" name="email" placeholder="Email" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    <input type="password" name="password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold">Sign Up</button>
+                    <button type="button" onclick="switchView('view-home')" class="w-full py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold">Back</button>
+                </form>
             </div>
         </div>
 
-        <div class="code-section">
-            <h2>📝 Sample Python Code</h2>
-            <div class="code-block">
-<span class="comment"># Python Voice Assistant Implementation</span>
-<span class="keyword">import</span> speech_recognition <span class="keyword">as</span> sr
-<span class="keyword">import</span> pyttsx3
-<span class="keyword">import</span> datetime
+        <div id="view-user-login" class="view-section">
+            <div class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">User Login</h2>
+                <form id="userLoginForm" class="space-y-4">
+                    <input type="text" name="username" placeholder="Username" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    <input type="password" name="password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" name="remember" id="userRemember" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                        <label for="userRemember" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                    </div>
 
-<span class="comment"># Initialize speech engine</span>
-engine = pyttsx3.<span class="function">init</span>()
-
-<span class="keyword">def</span> <span class="function">speak</span>(text):
-    <span class="string">"""Convert text to speech"""</span>
-    engine.<span class="function">say</span>(text)
-    engine.<span class="function">runAndWait</span>()
-
-<span class="keyword">def</span> <span class="function">listen</span>():
-    <span class="string">"""Listen to user voice input"""</span>
-    recognizer = sr.<span class="function">Recognizer</span>()
-    <span class="keyword">with</span> sr.<span class="function">Microphone</span>() <span class="keyword">as</span> source:
-        <span class="function">print</span>(<span class="string">"Listening..."</span>)
-        audio = recognizer.<span class="function">listen</span>(source)
-        <span class="keyword">try</span>:
-            text = recognizer.<span class="function">recognize_google</span>(audio)
-            <span class="keyword">return</span> text.<span class="function">lower</span>()
-        <span class="keyword">except</span>:
-            <span class="keyword">return</span> <span class="string">""</span>
-
-<span class="keyword">def</span> <span class="function">process_command</span>(command):
-    <span class="string">"""Process voice commands"""</span>
-    <span class="keyword">if</span> <span class="string">"weather"</span> <span class="keyword">in</span> command:
-        <span class="function">speak</span>(<span class="string">"Checking weather..."</span>)
-    <span class="keyword">elif</span> <span class="string">"time"</span> <span class="keyword">in</span> command:
-        time = datetime.datetime.<span class="function">now</span>().<span class="function">strftime</span>(<span class="string">"%H:%M"</span>)
-        <span class="function">speak</span>(<span class="string">f"The time is </span>{time}<span class="string">"</span>)
-    <span class="keyword">elif</span> <span class="string">"search"</span> <span class="keyword">in</span> command:
-        <span class="function">speak</span>(<span class="string">"Searching the web..."</span>)
-
-<span class="comment"># Main loop</span>
-<span class="keyword">while</span> <span class="keyword">True</span>:
-    command = <span class="function">listen</span>()
-    <span class="keyword">if</span> command:
-        <span class="function">process_command</span>(command)
+                    <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold">Login</button>
+                    <button type="button" onclick="switchView('view-home')" class="w-full py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold">Back</button>
+                </form>
             </div>
-            <p style="margin-top: 20px; color: #666;">
-                <strong>Required Libraries:</strong> speech_recognition, pyttsx3, pyaudio<br>
-                <strong>Install:</strong> pip install SpeechRecognition pyttsx3 pyaudio
-            </p>
+        </div>
+
+        <div id="view-admin-login" class="view-section">
+            <div class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Admin Login</h2>
+                <form id="adminLoginForm" class="space-y-4">
+                    <input type="text" name="username" placeholder="Username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500" required>
+                    <input type="password" name="password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500" required>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" name="remember" id="adminRemember" class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <label for="adminRemember" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold">Login</button>
+                    <button type="button" onclick="switchView('view-home')" class="w-full py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold">Back</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-admin-panel" class="view-section">
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Admin Panel</h2>
+                    <button onclick="resetToDefaults()" class="text-sm text-red-500 underline">Reset All Data</button>
+                </div>
+                
+                <div class="mb-8 p-6 bg-purple-50 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Add New Command</h3>
+                    <form id="addCommandForm" class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2 font-semibold">Command</label>
+                            <input type="text" name="command" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500" placeholder="e.g., what is your name" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2 font-semibold">Response</label>
+                            <textarea name="response" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500" placeholder="e.g., Ramesh" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold">
+                            <i data-lucide="plus" class="w-5 h-5"></i> Add Command
+                        </button>
+                    </form>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Existing Commands</h3>
+                    <div id="commandsList" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-chat" class="view-section">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Chat with AI</h2>
+                <p id="chatWelcomeMsg" class="text-gray-600 mb-6">Welcome!</p>
+                <div id="chatContainer" class="h-96 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200"></div>
+                <form id="chatForm" class="flex gap-2">
+                    <input type="text" id="chatInput" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500" placeholder="Type a command..." required>
+                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold flex items-center gap-2">
+                        <i data-lucide="send" class="w-5 h-5"></i> Send
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
-        let isListening = false;
+        // --- STORAGE KEYS ---
+        const STORAGE_KEY_USERS = 'ai_app_users';
+        const STORAGE_KEY_COMMANDS = 'ai_app_commands';
+        const STORAGE_KEY_SESSION_USER = 'ai_app_session_user';
+        const STORAGE_KEY_SESSION_ADMIN = 'ai_app_session_admin';
 
-        const responses = {
-            'weather': 'The current weather is sunny with a temperature of 72°F. Perfect day to go outside!',
-            'time': `The current time is ${new Date().toLocaleTimeString()}.`,
-            'date': `Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`,
-            'reminder': 'I\'ve set a reminder for 3 PM. I\'ll notify you then!',
-            'search': 'Searching for Python tutorials. I found several great resources on YouTube and official Python documentation.',
-            'music': 'Playing your favorite playlist from Spotify. Enjoy the music!',
-            'joke': 'Why do programmers prefer dark mode? Because light attracts bugs! 😄',
-            'default': 'I\'m processing your request. How else can I help you today?'
-        };
+        // --- DATA INIT ---
+        const DEFAULT_COMMANDS = [
+            { command: 'hello', response: 'Hello! How can I help you today?' },
+            { command: 'how are you', response: 'I am doing great! Thanks for asking.' },
+            { command: 'bye', response: 'Goodbye! Have a great day!' }
+        ];
 
-        function addMessage(text, isUser) {
-            const chatContainer = document.getElementById('chatContainer');
-            const message = document.createElement('div');
-            message.className = `message ${isUser ? 'user' : 'assistant'}`;
+        let users = [];
+        let commands = [];
+        let currentUser = null;
+        let isAdmin = false;
+        let chatHistory = [];
+
+        // --- STORAGE FUNCTIONS ---
+        function loadData() {
+            const storedUsers = localStorage.getItem(STORAGE_KEY_USERS);
+            const storedCommands = localStorage.getItem(STORAGE_KEY_COMMANDS);
             
-            const header = document.createElement('div');
-            header.className = 'message-header';
-            header.textContent = isUser ? '👤 You' : '🤖 Assistant';
-            
-            const content = document.createElement('div');
-            content.textContent = text;
-            
-            message.appendChild(header);
-            message.appendChild(content);
-            chatContainer.appendChild(message);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            users = storedUsers ? JSON.parse(storedUsers) : [];
+            commands = storedCommands ? JSON.parse(storedCommands) : [...DEFAULT_COMMANDS];
         }
 
-        function getResponse(command) {
-            const lowerCommand = command.toLowerCase();
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+            localStorage.setItem(STORAGE_KEY_COMMANDS, JSON.stringify(commands));
+        }
+
+        function resetToDefaults() {
+            if(confirm("This will delete all created users and custom commands. Are you sure?")) {
+                localStorage.clear(); // Clears everything including sessions
+                location.reload();
+            }
+        }
+
+        // --- HELPERS ---
+        function normalizeText(text) {
+            return text.toLowerCase().trim().replace(/\?/g, '').replace(/\s+/g, ' ');
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
             
-            for (const [key, response] of Object.entries(responses)) {
-                if (lowerCommand.includes(key)) {
-                    return response;
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (currentUser || isAdmin) {
+                logoutBtn.classList.remove('hidden');
+            } else {
+                logoutBtn.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        // --- CHECK REMEMBER ME ON LOAD ---
+        function checkSession() {
+            // Check Admin Session first
+            const adminSession = localStorage.getItem(STORAGE_KEY_SESSION_ADMIN);
+            if (adminSession === 'true') {
+                isAdmin = true;
+                currentUser = null;
+                renderCommandList();
+                switchView('view-admin-panel');
+                return;
+            }
+
+            // Check User Session
+            const userSession = localStorage.getItem(STORAGE_KEY_SESSION_USER);
+            if (userSession) {
+                const foundUser = users.find(u => u.username === userSession);
+                if (foundUser) {
+                    currentUser = foundUser;
+                    isAdmin = false;
+                    document.getElementById('chatWelcomeMsg').textContent = `Welcome back, ${foundUser.username}!`;
+                    chatHistory = [{ type: 'ai', message: 'Welcome back! Type a command.' }];
+                    renderChat();
+                    switchView('view-chat');
+                    return;
                 }
             }
-            
-            return responses.default;
+            // If no session, stay on home
         }
 
-        function startListening() {
-            isListening = true;
-            document.getElementById('avatar').classList.add('listening');
-            document.getElementById('statusText').textContent = 'Listening...';
-            document.getElementById('statusSubtext').textContent = 'Speak now';
-            document.getElementById('listenBtn').disabled = true;
-            document.getElementById('stopBtn').disabled = false;
-
-            // Simulate speech recognition (in real implementation, use Web Speech API)
-            setTimeout(() => {
-                const commands = [
-                    "What's the weather today?",
-                    "What time is it?",
-                    "Search for Python tutorials",
-                    "Play some music",
-                    "Tell me a joke"
-                ];
-                const randomCommand = commands[Math.floor(Math.random() * commands.length)];
-                processCommand(randomCommand);
-            }, 2000);
-        }
-
-        function stopListening() {
-            isListening = false;
-            document.getElementById('avatar').classList.remove('listening');
-            document.getElementById('statusText').textContent = 'Ready to Help!';
-            document.getElementById('statusSubtext').textContent = 'Click "Start Listening" or try a command below';
-            document.getElementById('listenBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
-        }
-
-        function processCommand(command) {
-            addMessage(command, true);
-            
-            setTimeout(() => {
-                const response = getResponse(command);
-                addMessage(response, false);
-                stopListening();
-            }, 1000);
-        }
-
-        function sendCommand(command) {
-            if (!isListening) {
-                processCommand(command);
+        // --- AUTH LOGIC ---
+        
+        // Signup
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            if (users.find(u => u.username === data.username)) {
+                alert('Username already exists!');
+                return;
             }
+            users.push(data);
+            saveData();
+            alert('Signup successful! Please login.');
+            e.target.reset();
+            switchView('view-user-login');
+        });
+
+        // User Login
+        document.getElementById('userLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            const rememberMe = formData.get('remember') === 'on'; // Checkbox value
+
+            const user = users.find(u => u.username === data.username && u.password === data.password);
+            
+            if (user) {
+                currentUser = user;
+                isAdmin = false;
+                
+                // Handle Remember Me
+                if (rememberMe) {
+                    localStorage.setItem(STORAGE_KEY_SESSION_USER, user.username);
+                }
+
+                document.getElementById('chatWelcomeMsg').textContent = `Welcome, ${user.username}!`;
+                chatHistory = [{ type: 'ai', message: 'Welcome! Type a command to get started.' }];
+                renderChat();
+                switchView('view-chat');
+                e.target.reset();
+            } else {
+                alert('Invalid credentials!');
+            }
+        });
+
+        // Admin Login
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            const rememberMe = formData.get('remember') === 'on'; // Checkbox value
+
+            if (data.username === 'ramesh' && data.password === 'ramvaishu@2218') {
+                isAdmin = true;
+                currentUser = null;
+
+                // Handle Remember Me
+                if (rememberMe) {
+                    localStorage.setItem(STORAGE_KEY_SESSION_ADMIN, 'true');
+                }
+
+                renderCommandList();
+                switchView('view-admin-panel');
+                e.target.reset();
+            } else {
+                alert('Invalid admin credentials!');
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            currentUser = null;
+            isAdmin = false;
+            chatHistory = [];
+            // Clear Remember Me Sessions
+            localStorage.removeItem(STORAGE_KEY_SESSION_USER);
+            localStorage.removeItem(STORAGE_KEY_SESSION_ADMIN);
+            switchView('view-home');
+        });
+
+        // --- ADMIN PANEL LOGIC ---
+        function renderCommandList() {
+            const container = document.getElementById('commandsList');
+            container.innerHTML = '';
+            commands.forEach((cmd, index) => {
+                const div = document.createElement('div');
+                div.className = 'p-4 bg-gray-50 rounded-lg border border-gray-200';
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="font-semibold text-indigo-600 mb-1">Command: ${cmd.command}</p>
+                            <p class="text-gray-700">Response: ${cmd.response}</p>
+                        </div>
+                        <button onclick="deleteCommand(${index})" class="ml-4 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            lucide.createIcons();
         }
 
-        // Simulate speech synthesis
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 1;
-                utterance.pitch = 1;
-                window.speechSynthesis.speak(utterance);
+        document.getElementById('addCommandForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            commands.push({ 
+                command: data.command.trim(), 
+                response: data.response.trim() 
+            });
+            saveData();
+            alert('Command added successfully and saved!');
+            e.target.reset();
+            renderCommandList();
+        });
+
+        window.deleteCommand = (index) => {
+            if(confirm('Delete this command?')) {
+                commands.splice(index, 1);
+                saveData();
+                renderCommandList();
             }
+        };
+
+        // --- CHAT LOGIC ---
+        function renderChat() {
+            const container = document.getElementById('chatContainer');
+            container.innerHTML = '';
+            chatHistory.forEach(chat => {
+                const wrapper = document.createElement('div');
+                wrapper.className = `mb-3 ${chat.type === 'user' ? 'text-right' : 'text-left'}`;
+                const bubble = document.createElement('div');
+                bubble.className = `inline-block px-4 py-2 rounded-lg ${chat.type === 'user' ? 'bg-indigo-600 text-white' : 'bg-gray-300 text-gray-800'}`;
+                bubble.textContent = chat.message;
+                wrapper.appendChild(bubble);
+                container.appendChild(wrapper);
+            });
+            container.scrollTop = container.scrollHeight;
         }
+
+        document.getElementById('chatForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputEl = document.getElementById('chatInput');
+            const userText = inputEl.value;
+            if (!userText.trim()) return;
+
+            chatHistory.push({ type: 'user', message: userText });
+
+            const matchedCommand = commands.find(cmd => 
+                normalizeText(cmd.command) === normalizeText(userText)
+            );
+
+            const aiResponse = matchedCommand 
+                ? matchedCommand.response 
+                : "I don't understand that command. Please try another one.";
+
+            setTimeout(() => {
+                chatHistory.push({ type: 'ai', message: aiResponse });
+                renderChat();
+            }, 300);
+
+            inputEl.value = '';
+            renderChat();
+        });
+
+        // --- APP STARTUP ---
+        loadData();
+        checkSession(); // Checks if user checked 'Remember Me' previously
+        lucide.createIcons();
     </script>
 </body>
 </html>
